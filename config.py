@@ -1,28 +1,30 @@
 import mysql.connector
 
-# Replace these with your MySQL server details
-db_config = {
-    'host': 'your_mysql_host',
-    'user': 'your_mysql_user',
-    'password': 'your_mysql_password',
-    'database': 'your_mysql_database'
-}
+# Replace these values with your MySQL server details
+host = 'localhost'
+user = 'root'
+password = ""
+database = 'keuzedeel'
 
-# Connect to the MySQL database
-connection = mysql.connector.connect(**db_config)
-
-# Create a cursor object to execute SQL queries
-cursor = connection.cursor()
-
-# Example: Create a table
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL
+# Establish a connection
+try:
+    connection = mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
-''')
 
-# Commit the changes and close the connection
-connection.commit()
-connection.close()
+    if connection.is_connected():
+        print("Connected to the MySQL database")
+
+    # Your database operations go here
+
+except mysql.connector.Error as e:
+    print(f"Error: {e}")
+
+finally:
+    # Close the connection in a finally block to ensure it's always closed
+    if 'connection' in locals() and connection.is_connected():
+        connection.close()
+        print("Connection closed")
