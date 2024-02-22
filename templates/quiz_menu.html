@@ -5,14 +5,65 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Menu</title>
-    <!-- Add your styling if needed -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        .quiz-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 80%; /* Adjust the width as needed */
+            margin: 20px auto; /* Center the grid */
+        }
+
+        .quiz {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            font-size: 18px;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .quiz:hover {
+            background-color: #f0f0f0;
+        }
+
+        p {
+            font-size: 16px;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
-    <h2>Quiz Menu</h2>
-    <ul>
-        {% for quiz in quizzes %}
-            <li><a href="{{ url_for('view_quiz', quiz_id=quiz.id) }}">{{ quiz.title }}</a></li>
-        {% endfor %}
-    </ul>
+    <h1>Quiz Menu</h1>
+    
+    <div class="quiz-container">
+        {% if quizzes %}
+            {% for quiz in quizzes %}
+                <a href="{{ url_for('quiz_task', quiz_id=quiz.id) }}" class="quiz">{{ quiz.quizname }}</a>
+            {% endfor %}
+        {% else %}
+            <p>No quizzes available.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Add additional content as needed -->
 </body>
 </html>

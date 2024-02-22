@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Task</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        .quiz-details {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            font-size: 18px;
+            color: #333;
+            width: 80%; /* Adjust the width as needed */
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        h3 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .answer {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .answer:hover {
+            background-color: #f0f0f0;
+        }
+
+        .correct {
+            background-color: #5cb85c; /* Green */
+        }
+
+        .incorrect {
+            background-color: #d9534f; /* Red */
+        }
+
+        .correct-answer {
+            background-color: #007bff; /* Blue */
+        }
+
+        p {
+            font-size: 16px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Task Details</h1>
+    
+    {% if quiz_task_details %}
+        {% for task in quiz_task_details %}
+            <div class="quiz-details" id="quizDetails">
+                <h3>{{ task.question }}</h3>
+                {% if task.answer1 %}<div class="answer" data-answer="1" onclick="checkAnswer(this)">{{ task.answer1 }}</div>{% endif %}
+                {% if task.answer2 %}<div class="answer" data-answer="2" onclick="checkAnswer(this)">{{ task.answer2 }}</div>{% endif %}
+                {% if task.answer3 %}<div class="answer" data-answer="3" onclick="checkAnswer(this)">{{ task.answer3 }}</div>{% endif %}
+                {% if task.answer4 %}<div class="answer" data-answer="4" onclick="checkAnswer(this)">{{ task.answer4 }}</div>{% endif %}
+                
+                <p id="correctAnswer" style="display:none;">{{ task.correctAnswer }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No details available for this quiz task.</p>
+    {% endif %}
+
+    <script>
+        function checkAnswer(selectedAnswer) {
+            var correctAnswer = parseInt(document.getElementById('correctAnswer').innerText.trim(), 10);
+            var quizDetails = document.getElementById('quizDetails');
+    
+            // Reset all answers to default style
+            var answers = quizDetails.getElementsByClassName('answer');
+            for (var i = 0; i < answers.length; i++) {
+                answers[i].classList.remove('correct', 'incorrect', 'correct-answer');
+            }
+    
+            // Check if the selected answer is correct
+            var selectedAnswerValue = parseInt(selectedAnswer.getAttribute('data-answer'), 10);
+            if (selectedAnswerValue === correctAnswer) {
+                selectedAnswer.classList.add('correct');
+            } else {
+                selectedAnswer.classList.add('incorrect');
+    
+                // Highlight the correct answer
+                for (var i = 0; i < answers.length; i++) {
+                    var answerValue = parseInt(answers[i].getAttribute('data-answer'), 10);
+                    if (answerValue === correctAnswer) {
+                        answers[i].classList.add('correct-answer');
+                        break;
+                    }
+                }
+            }
+        }
+    </script>   
+</body>
+</html>
