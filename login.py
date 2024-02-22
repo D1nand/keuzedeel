@@ -86,12 +86,12 @@ def quiz_task(quiz_id):
         if connection.is_connected():
             cursor = connection.cursor(dictionary=True)
 
-            # Fetch quiz task details from the database
-            query = f"SELECT * FROM quiztask WHERE quiz_id = {quiz_id}"
+            # Fetch the first question for the given quiz_id
+            query = f"SELECT * FROM quiztask WHERE quiz_id = {quiz_id} ORDER BY id LIMIT 1"
             cursor.execute(query)
-            quiz_task_details = cursor.fetchall()
+            first_question = cursor.fetchone()
 
-            return render_template('quiz_task.html', quiz_task_details=quiz_task_details)
+            return render_template('quiz_task.html', quiz_task_details=[first_question])
 
     except mysql.connector.Error as e:
         print(f"Error: {e}")
@@ -101,6 +101,35 @@ def quiz_task(quiz_id):
             connection.close()
 
     return render_template('quiz_task.html', quiz_task_details=None)
+
+@app.route('/quiz_task/<int:quiz_id>/<int:question_id>')
+def quiz_task_detail(quiz_id, question_id):
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+
+        if connection.is_connected():
+            cursor = connection.cursor(dictionary=True)
+
+            # Fetch the current question details
+            query = f"SELECT * FROM quiztask WHERE quiz_id = {quiz_id} AND id = {question_id}"
+            cursor.execute(query)
+            current_question = cursor.fetchone()
+
+            # Check if the current question has been answered
+            current_question['answered'] = request.args.get('answered') == 'True'
+
+            return render_template('quiz_task.html', quiz_task_details=[current_question])
+
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            connection.close()
+
+    return render_template('quiz_task.html', quiz_task_details=None)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
