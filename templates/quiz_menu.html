@@ -49,20 +49,37 @@
             font-size: 16px;
             color: #888;
         }
+        .add-quiz {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        /* Style the plus icon on hover */
+        .add-quiz:hover {
+            color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <h1>Quiz Menu</h1>
-    
+    <a href="{{ url_for('add_quiz') }}" class="add-quiz">+</a>
+
     <div class="quiz-container">
         {% if quizzes %}
             {% for quiz in quizzes %}
-                <a href="{{ url_for('quiz_task', quiz_id=quiz.id) }}" class="quiz">{{ quiz.quizname }}</a>
+                {% set first_question = quiz_tasks_dict.get(quiz.id, {'id': None}) %}
+                <a href="{{ url_for('quiz_task_detail', quiz_id=quiz.id, question_id=first_question.id|default(-1)) }}" class="quiz">{{ quiz.quizname }}</a>
             {% endfor %}
         {% else %}
             <p>No quizzes available.</p>
         {% endif %}
     </div>
+    
+    
     
     <!-- Add additional content as needed -->
 </body>

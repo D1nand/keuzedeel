@@ -1,170 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz Task Details</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
 
-        h1 {
-            color: #007bff;
-        }
+      h1 {
+        color: #007bff;
+      }
 
-        .quiz-details {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 20px;
-            font-size: 18px;
-            color: #333;
-            width: 80%; /* Adjust the width as needed */
-            margin: 20px 0;
-            text-align: center;
-        }
+      .quiz-details {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 20px;
+        font-size: 18px;
+        color: #333;
+        width: 80%; /* Adjust the width as needed */
+        margin: 20px 0;
+        text-align: center;
+      }
 
-        h3 {
-            color: #007bff;
-            margin-bottom: 20px;
-        }
+      h3 {
+        color: #007bff;
+        margin-bottom: 20px;
+      }
 
-        .answer {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+      .answer {
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
 
-        .answer:hover {
-            background-color: #f0f0f0;
-        }
+      .answer:hover {
+        background-color: #f0f0f0;
+      }
 
-        .correct {
-            background-color: #5cb85c; /* Green */
-        }
+      .correct {
+        background-color: #5cb85c; /* Green */
+      }
 
-        .incorrect {
-            background-color: #d9534f; /* Red */
-        }
+      .incorrect {
+        background-color: #d9534f; /* Red */
+      }
 
-        .correct-answer {
-            background-color: #007bff; /* Blue */
-        }
+      .correct-answer {
+        background-color: #007bff; /* Blue */
+      }
 
-        p {
-            font-size: 16px;
-            color: #888;
-        }
+      p {
+        font-size: 16px;
+        color: #888;
+      }
 
-        /* Style for the Next button */
-        #nextButton {
-            display: none;
-            padding: 10px;
-            margin-top: 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+      /* Style for the Next button */
+      #nextButton {
+        display: none;
+        padding: 10px;
+        margin-bottom: 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Quiz Task Details</h1>
+    <button id="nextButton" onclick="submitForm()">Next</button>
+    <script>
+        console.log('Quiz Task Details:', '{{ quiz_task_details | tojson | safe }}');
+    </script>
+    
+    <script>
+        function submitForm() {
+            console.log('Submit form button clicked');
+            console.log('Quiz ID:', '{{ quiz_task_details[0]["id"] }}');
+            console.log('Next Question ID:', '{{ quiz_task_details[2] }}');
 
-    {% if quiz_task_details %}
-        {% for task in quiz_task_details %}
-            <div class="quiz-details" id="quizDetails">
-                <h3>{{ task.question }}</h3>
-            {% if task.answer1 %}
-                <div class="answer" data-answer="1" onclick="checkAnswer(this)">{{ task.answer1 }}</div>
-            {% endif %}
-            {% if task.answer2 %}
-                <div class="answer" data-answer="2" onclick="checkAnswer(this)">{{ task.answer2 }}</div>
-            {% endif %}
-            {% if task.answer3 %}
-                <div class="answer" data-answer="3" onclick="checkAnswer(this)">{{ task.answer3 }}</div>
-            {% endif %}
-            {% if task.answer4 %}
-                <div class="answer" data-answer="4" onclick="checkAnswer(this)">{{ task.answer4 }}</div>
-            {% endif %}
-            
-                <p id="correctAnswer" style="display:none;">{{ task.correctAnswer }}</p>
-            </div>
-            {% if task.answered %}
-            <button id="nextButton" onclick="nextQuestion({{ quiz_task_details[0].id }})">Next</button>
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        <p>No details available for this quiz task.</p>
+          var form = document.createElement('form');
+          form.method = 'post';
+          form.action = `/quiz_task/${quiz_id}/${question_id}`;
+
+        
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'answered';
+          input.value = 'True';
+        
+          form.appendChild(input);
+          document.body.appendChild(form);
+        
+          form.submit();
+        }
+        </script>
+        
+    
+    
+    {% if quiz_task_details %} {% for task in quiz_task_details %}
+    <div class="quiz-details" id="quizDetails">
+      <h3>{{ task.question }}</h3>
+      {% if task.answer1 %}
+      <div class="answer" data-answer="1" onclick="checkAnswer(this, '{{ task.correctAnswer }}', '{{ task.id }}')">
+        {{ task.answer1 }}
+      </div>      
+      {% endif %} {% if task.answer2 %}
+      <div class="answer" data-answer="2" onclick="checkAnswer(this, '{{ task.correctAnswer }}', '{{ task.id }}')">
+        {{ task.answer2 }}
+      </div>
+      
+      {% endif %} {% if task.answer3 %}
+      <div class="answer" data-answer="3" onclick="checkAnswer(this, '{{ task.correctAnswer }}', '{{ task.id }}')">
+        {{ task.answer3 }}
+      </div>
+      {% endif %} {% if task.answer4 %}
+      <div class="answer" data-answer="4" onclick="checkAnswer(this, '{{ task.correctAnswer }}', '{{ task.id }}')">
+        {{ task.answer4 }}
+      </div>
+      {% endif %}
+
+      <p id="correctAnswer" style="display: none">{{ task.correctAnswer }}</p>
+    </div>
+    {% endfor %}
     {% endif %}
 
     <script>
         var answerSelected = false; // Variable to track whether an answer has been selected
-    
-        function checkAnswer(selectedAnswer) {
-            if (answerSelected) {
-                return; // Exit the function if an answer has already been selected
-            }
-    
-            var correctAnswer = parseInt(document.getElementById('correctAnswer').innerText.trim(), 10);
-            var quizDetails = document.getElementById('quizDetails');
-    
-            // Reset all answers to default style
-            var answers = quizDetails.getElementsByClassName('answer');
+      
+        function checkAnswer(selectedAnswer, correctAnswer, taskId) {
+          if (answerSelected) {
+            return; // Exit the function if an answer has already been selected
+          }
+      
+          var quizDetails = document.getElementById("quizDetails");
+      
+          // Reset all answers to default style
+          var answers = quizDetails.getElementsByClassName("answer");
+          for (var i = 0; i < answers.length; i++) {
+            answers[i].classList.remove("correct", "incorrect", "correct-answer");
+            answers[i].removeAttribute("onclick"); // Remove the onclick attribute to disable further clicks
+          }
+      
+          // Check if the selected answer is correct
+          var selectedAnswerText = selectedAnswer.innerText.trim();
+          var selectedAnswerValue = parseInt(
+            selectedAnswer.getAttribute("data-answer"),
+            10
+          );
+          
+          // Ensure correctAnswer is in the correct format for comparison
+          correctAnswer = parseInt(correctAnswer, 10);
+      
+          if (selectedAnswerValue === correctAnswer) {
+            selectedAnswer.classList.add("correct");
+          } else {
+            selectedAnswer.classList.add("incorrect");
+      
+            // Highlight the correct answer
             for (var i = 0; i < answers.length; i++) {
-                answers[i].classList.remove('correct', 'incorrect', 'correct-answer');
-                answers[i].removeAttribute('onclick'); // Remove the onclick attribute to disable further clicks
+              var answerValue = parseInt(
+                answers[i].getAttribute("data-answer"),
+                10
+              );
+              if (answerValue === correctAnswer) {
+                answers[i].classList.add("correct-answer");
+                break;
+              }
             }
-    
-            // Check if the selected answer is correct
-            var selectedAnswerText = selectedAnswer.innerText.trim();
-            var selectedAnswerValue = parseInt(selectedAnswer.getAttribute('data-answer'), 10);
-            if (selectedAnswerValue === correctAnswer) {
-                selectedAnswer.classList.add('correct');
-            } else {
-                selectedAnswer.classList.add('incorrect');
-    
-                // Highlight the correct answer
-                for (var i = 0; i < answers.length; i++) {
-                    var answerValue = parseInt(answers[i].getAttribute('data-answer'), 10);
-                    if (answerValue === correctAnswer) {
-                        answers[i].classList.add('correct-answer');
-                        break;
-                    }
-                }
-            }
-    
-            // Set the variable to true to prevent further clicks
-            answerSelected = true;
-    
-            // Display the Next button after answering the question
-            var nextButton = document.getElementById('nextButton');
-            if (nextButton) {
-                nextButton.style.display = 'block';
-            }
+          }
+      
+          // Set the variable to true to prevent further clicks
+          answerSelected = true;
+      
+          // Display the Next button immediately after answering the question
+          var nextButton = document.getElementById("nextButton");
+          if (nextButton) {
+            nextButton.style.display = "block";
+          }
+      
+          // Additional logic to handle the task on the server or client side
+          // Example: You can make an AJAX request to update the server about the answered task
+          console.log("Task ID:", taskId);
         }
-    
-        function nextQuestion(currentQuestionId) {
-        // Redirect to the next question based on the current question's id
-        window.location.href = '/quiz_task/{{ quiz_id }}/' + (currentQuestionId + 1);
-    }
-    </script>
-    
-    
-</body>
+      
+        // Add an event listener to the window to check answerSelected and display the Next button
+        window.addEventListener('click', function() {
+          if (answerSelected) {
+            var nextButton = document.getElementById("nextButton");
+            if (nextButton) {
+              nextButton.style.display = "block";
+            }
+          }
+        });
+        
+      </script>      
+             
+  </body>
 </html>
