@@ -49,6 +49,7 @@ def login():
             return render_template('login.html', error="Invalid username or password")
 
     return render_template('login.html')
+
 @app.route('/quiz_menu')
 def quiz_menu():
     try:
@@ -83,12 +84,23 @@ def quiz_menu():
     return render_template('quiz_menu.html', quizzes=None, quiz_tasks_dict=None)
 
 
+# ... (other imports and configurations)
+
 @app.route('/add_quiz', methods=['GET', 'POST'])
 def add_quiz():
     if request.method == 'POST':
-        # Retrieve form data
         quizname = request.form['quizname']
         tasks = request.form.getlist('tasks[]')
+        correct_answers = request.form.getlist('correctAnswers[]')
+        
+        # Retrieve answers for each task
+        answers = []
+        for task_index, task in enumerate(tasks, start=1):
+            answer_list = []
+            for answer_index in range(1, 5):
+                answer = request.form.get(f'answers[{task_index}][{answer_index}]', '')
+                answer_list.append(answer.strip())  # Remove leading/trailing whitespaces
+            answers.append(answer_list)
 
         try:
             connection = mysql.connector.connect(**DB_CONFIG)
@@ -106,21 +118,21 @@ def add_quiz():
                 quiz_id = cursor.fetchone()['quiz_id']
 
                 # Insert tasks and answers into the quiztask table
-# Insert tasks and answers into the quiztask table
-            query_insert_task = "INSERT INTO quiztask (quiz_id, question, answer1, answer2, answer3, answer4, ) VALUES (%s, %s, %s, %s, %s, %s)"
-            for task_index, task in enumerate(tasks, start=1):
-                answer_list = request.form.getlist(f'answers[][{task_index}]')
-                answer1, answer2, answer3, answer4 = answer_list + [None] * (4 - len(answer_list))
-                try:
-                    cursor.execute(query_insert_task, (quiz_id, task, answer1, answer2, answer3, answer4))
+                for task_index, task in enumerate(tasks, start=1):
+                    answer_list = answers[task_index - 1]
+
+                    # Ensure that answer_list has at least four elements, filling any missing elements with an empty string
+                    while len(answer_list) < 4:
+                        answer_list.append('')
+
+                    answer1, answer2, answer3, answer4 = answer_list[:4]
+
+                    # Get the correct answer index
+                    correct_answer_index = int(correct_answers[task_index - 1])
+
+                    query_insert_task = "INSERT INTO quiztask (quiz_id, question, Answer1, Answer2, Answer3, Answer4, correctAnswer) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                    cursor.execute(query_insert_task, (quiz_id, task, answer1, answer2, answer3, answer4, correct_answer_index))
                     connection.commit()
-                    print(f"Inserted task {task_index} for quiz {quiz_id}")
-                except mysql.connector.Error as e:
-                    print(f"Error inserting task {task_index}: {e}")
-# Ensure that there's an except block or finally block after the try block
-
-
-
 
                 # Redirect to the quiz menu or wherever you want
                 return redirect(url_for('quiz_menu'))
