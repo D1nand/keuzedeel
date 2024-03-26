@@ -145,7 +145,6 @@ def add_quiz():
                 connection.close()
 
     return render_template('add_quiz.html')
-
 @app.route('/quiz_task/<int:quiz_id>/<int:question_id>', methods=['GET', 'POST'])
 def quiz_task_detail(quiz_id, question_id):
     try:
@@ -164,6 +163,9 @@ def quiz_task_detail(quiz_id, question_id):
                     next_question_id = next_question['id']
                     print(f"Next Question ID (POST): {next_question_id}")
                     return render_template('quiz_task.html', quiz_task_details=[next_question, quiz_id, next_question_id])
+                else:
+                    # No more questions, redirect to a page indicating all questions are answered
+                    return redirect(url_for('all_questions_answered'))
 
             # Fetch the current question details for GET request
             query = f"SELECT * FROM quiztask WHERE quiz_id = {quiz_id} AND id = {question_id}"
@@ -174,6 +176,16 @@ def quiz_task_detail(quiz_id, question_id):
             current_question['answered'] = request.args.get('answered') == 'True'
 
             print(f"Current Question ID: {question_id}")
+
+            # Check if there are no more questions left for the quiz
+            query_remaining = f"SELECT COUNT(*) AS remaining FROM quiztask WHERE quiz_id = {quiz_id} AND id > {question_id}"
+            cursor.execute(query_remaining)
+            remaining_questions = cursor.fetchone()['remaining']
+
+            if remaining_questions == 0:
+                # No more questions, redirect to a page indicating all questions are answered
+                return redirect(url_for('all_questions_answered'))
+
             return render_template('quiz_task.html', quiz_task_details=[current_question, quiz_id, question_id])
 
     except mysql.connector.Error as e:
@@ -184,6 +196,11 @@ def quiz_task_detail(quiz_id, question_id):
             connection.close()
 
     return render_template('quiz_task.html', quiz_task_details=None)
+
+# New route for when all questions are answered
+@app.route('/all_questions_answered')
+def all_questions_answered():
+    return render_template('all_questions_answered.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

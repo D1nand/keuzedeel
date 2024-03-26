@@ -69,6 +69,13 @@
         color: #888;
       }
 
+      .score {
+        font-size: 20px;
+        color: #333;
+        margin-top: 20px;
+        font-weight: bold;
+      }
+
       /* Style for the Next button */
       #nextButton {
         display: none;
@@ -84,39 +91,50 @@
     </style>
   </head>
   <body>
-    <h1>Quiz Task Details</h1>
-    <button id="nextButton" onclick="submitForm()">Next</button>
     <script>
-        console.log('Quiz Task Details:', '{{ quiz_task_details | tojson | safe }}');
-    </script>
-    
-    <script>
-        function submitForm() {
-            console.log('Submit form button clicked');
-            console.log('Quiz ID:', '{{ quiz_task_details[0]["id"] }}');
-            console.log('Next Question ID:', '{{ quiz_task_details[2] }}');
+      // Reset the score to 0 when the page loads
+      var score = 0;
 
-          var form = document.createElement('form');
-          form.method = 'post';
-          form.action = `/quiz_task/${quiz_id}/${question_id}`;
+      // Check if the score is already stored in localStorage
+      var storedScore = localStorage.getItem("quizScore");
+      if (storedScore !== null) {
+        score = parseInt(storedScore, 10);
+      }
 
-        
-          var input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = 'answered';
-          input.value = 'True';
-        
-          form.appendChild(input);
-          document.body.appendChild(form);
-        
-          form.submit();
+      function submitForm(quizId, questionId) {
+        console.log('Submit form button clicked');
+        console.log('Quiz ID:', quizId);
+        console.log('Next Question ID:', questionId);
+
+        var selectedAnswer = document.querySelector('.correct');
+        if (selectedAnswer) {
+          // Increment the score for a correct answer
+          score += 100;
         }
-        </script>
-        
-    
-    
-    {% if quiz_task_details %} {% for task in quiz_task_details %}
+
+        // Store the updated score in localStorage
+        localStorage.setItem('quizScore', score);
+
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = `/quiz_task/${quizId}/${questionId}`;
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'answered';
+        input.value = 'True';
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+
+        form.submit();
+      }
+    </script>
+    <h1>Quiz Task Details</h1>
+    <button id="nextButton" onclick="submitForm('{{ quiz_task_details[1] }}', '{{ quiz_task_details[2] }}')">Next</button>
+
     <div class="quiz-details" id="quizDetails">
+      {% if quiz_task_details %} {% for task in quiz_task_details %}
       <h3>{{ task.question }}</h3>
       {% if task.answer1 %}
       <div class="answer" data-answer="1" onclick="checkAnswer(this, '{{ task.correctAnswer }}', '{{ task.id }}')">
@@ -138,80 +156,117 @@
       {% endif %}
 
       <p id="correctAnswer" style="display: none">{{ task.correctAnswer }}</p>
+      {% endfor %}
+      {% endif %}
     </div>
-    {% endfor %}
-    {% endif %}
+
+    <p class="score" id="score">Score: 0</p>
 
     <script>
-        var answerSelected = false; // Variable to track whether an answer has been selected
-      
-        function checkAnswer(selectedAnswer, correctAnswer, taskId) {
-          if (answerSelected) {
-            return; // Exit the function if an answer has already been selected
-          }
-      
-          var quizDetails = document.getElementById("quizDetails");
-      
-          // Reset all answers to default style
-          var answers = quizDetails.getElementsByClassName("answer");
+      // Check if the score is already stored in localStorage
+      var score = parseInt(localStorage.getItem('quizScore')) || 0;
+      var answerSelected = false; // Variable to track whether an answer has been selected
+    
+      // Function to update the score on the page
+      function updateScore() {
+        var scoreElement = document.getElementById("score");
+        if (scoreElement) {
+          scoreElement.textContent = "Score: " + score;
+        }
+      }
+    
+      // Call updateScore to display the initial score
+      updateScore();
+    
+      function submitForm(quizId, questionId) {
+        console.log('Submit form button clicked');
+        console.log('Quiz ID:', quizId);
+        console.log('Next Question ID:', questionId);
+    
+        // Store the updated score in localStorage
+        localStorage.setItem('quizScore', score);
+    
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = `/quiz_task/${quizId}/${questionId}`;
+    
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'answered';
+        input.value = 'True';
+    
+        form.appendChild(input);
+        document.body.appendChild(form);
+    
+        form.submit();
+      }
+    
+      function checkAnswer(selectedAnswer, correctAnswer, taskId) {
+        if (answerSelected) {
+          return; // Exit the function if an answer has already been selected
+        }
+    
+        var quizDetails = document.getElementById("quizDetails");
+    
+        // Reset all answers to default style
+        var answers = quizDetails.getElementsByClassName("answer");
+        for (var i = 0; i < answers.length; i++) {
+          answers[i].classList.remove("correct", "incorrect", "correct-answer");
+          answers[i].removeAttribute("onclick"); // Remove the onclick attribute to disable further clicks
+        }
+    
+        // Check if the selected answer is correct
+        var selectedAnswerText = selectedAnswer.innerText.trim();
+        var selectedAnswerValue = parseInt(
+          selectedAnswer.getAttribute("data-answer"),
+          10
+        );
+    
+        // Ensure correctAnswer is in the correct format for comparison
+        correctAnswer = parseInt(correctAnswer, 10);
+    
+        if (selectedAnswerValue === correctAnswer) {
+          selectedAnswer.classList.add("correct");
+          // Increment the score for a correct answer
+          score += 100;
+        } else {
+          selectedAnswer.classList.add("incorrect");
+    
+          // Highlight the correct answer
           for (var i = 0; i < answers.length; i++) {
-            answers[i].classList.remove("correct", "incorrect", "correct-answer");
-            answers[i].removeAttribute("onclick"); // Remove the onclick attribute to disable further clicks
-          }
-      
-          // Check if the selected answer is correct
-          var selectedAnswerText = selectedAnswer.innerText.trim();
-          var selectedAnswerValue = parseInt(
-            selectedAnswer.getAttribute("data-answer"),
-            10
-          );
-          
-          // Ensure correctAnswer is in the correct format for comparison
-          correctAnswer = parseInt(correctAnswer, 10);
-      
-          if (selectedAnswerValue === correctAnswer) {
-            selectedAnswer.classList.add("correct");
-          } else {
-            selectedAnswer.classList.add("incorrect");
-      
-            // Highlight the correct answer
-            for (var i = 0; i < answers.length; i++) {
-              var answerValue = parseInt(
-                answers[i].getAttribute("data-answer"),
-                10
-              );
-              if (answerValue === correctAnswer) {
-                answers[i].classList.add("correct-answer");
-                break;
-              }
+            var answerValue = parseInt(
+              answers[i].getAttribute("data-answer"),
+              10
+            );
+            if (answerValue === correctAnswer) {
+              answers[i].classList.add("correct-answer");
+              break;
             }
           }
-      
-          // Set the variable to true to prevent further clicks
-          answerSelected = true;
-      
-          // Display the Next button immediately after answering the question
+        }
+    
+        // Set the variable to true to prevent further clicks
+        answerSelected = true;
+    
+        // Display the Next button immediately after answering the question
+        var nextButton = document.getElementById("nextButton");
+        if (nextButton) {
+          nextButton.style.display = "block";
+        }
+    
+        // Update the score on the page
+        updateScore();
+      }
+    
+      // Add an event listener to the window to check answerSelected and display the Next button
+      window.addEventListener('click', function () {
+        if (answerSelected) {
           var nextButton = document.getElementById("nextButton");
           if (nextButton) {
             nextButton.style.display = "block";
           }
-      
-          // Additional logic to handle the task on the server or client side
-          // Example: You can make an AJAX request to update the server about the answered task
-          console.log("Task ID:", taskId);
         }
-      
-        // Add an event listener to the window to check answerSelected and display the Next button
-        window.addEventListener('click', function() {
-          if (answerSelected) {
-            var nextButton = document.getElementById("nextButton");
-            if (nextButton) {
-              nextButton.style.display = "block";
-            }
-          }
-        });
-        
-      </script>      
-             
+      });
+    </script>
   </body>
 </html>
